@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SoulSync — AI Companion</title>
+    <meta name="description" content="SoulSync: a calming, privacy-first AI mental health companion." />
+    <meta name="theme-color" content="#0e1326" />
+
+    <link rel="stylesheet" href="styles.css" />
+    <!-- Chart.js for analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
+    <script defer src="app.js"></script>
+  </head>
+  <body>
+    <canvas id="starfield" aria-hidden="true"></canvas>
+    <header class="topbar" role="banner">
+      <button id="menuToggle" class="icon-btn" aria-label="Open menu" title="Open menu">
+        <svg viewBox="0 0 24 24" class="icon"><path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+      </button>
+      <div class="brand">
+        <span class="logo" aria-hidden="true">🜂</span>
+        <h1 class="app-title">SoulSync</h1>
+      </div>
+      <button id="themeToggle" class="icon-btn" aria-label="Toggle dark mode" title="Toggle dark mode">
+        <svg viewBox="0 0 24 24" class="icon"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 109.79 9.79z"/></svg>
+      </button>
+    </header>
+
+    <div id="scrim" class="scrim" hidden></div>
+    <main id="app" class="container" role="main">
+      <div class="layout">
+        <aside class="sidebar" aria-label="Sidebar">
+          <div class="side-top">
+            <button id="newChat" class="primary full">New chat</button>
+            <nav class="side-nav">
+              <button id="navChat" class="side-btn active" data-view="chat">Chat</button>
+              <button id="navJournal" class="side-btn" data-view="journal">Journal</button>
+              <button id="navAnalytics" class="side-btn" data-view="analytics">Analytics</button>
+              <button id="navSettings" class="side-btn" data-view="settings">Settings</button>
+            </nav>
+            <div class="side-list" id="conversationList" aria-label="Conversations"></div>
+          </div>
+          <div class="side-bottom">
+            <small class="muted">Local-first. No tracking.</small>
+          </div>
+        </aside>
+
+        <section class="chat-main">
+          <div class="messages" id="tab-chat" data-view="chat">
+            <div id="chatList" class="chat-list" aria-live="polite" aria-label="Conversation"></div>
+          </div>
+
+          <div class="panel" id="tab-journal" data-view="journal" hidden>
+            <div class="panel-inner">
+              <h2>Journal</h2>
+              <div class="journal-controls">
+                <label for="promptSelect" class="label">Prompt</label>
+                <select id="promptSelect" class="select">
+                  <option value="grateful">What are 3 things you’re grateful for today?</option>
+                  <option value="energy">What energized you today? What drained you?</option>
+                  <option value="selftalk">How did you speak to yourself today?</option>
+                  <option value="goal">What small goal can you set for tomorrow?</option>
+                </select>
+              </div>
+              <textarea id="journalText" class="journal-text" rows="8" placeholder="Write freely. Your entries stay on this device."></textarea>
+              <div class="mood-row">
+                <label for="mood" class="label">Mood</label>
+                <input id="mood" type="range" min="1" max="5" value="3" step="1" />
+                <div id="moodEmoji" class="mood-emoji" aria-hidden="true">😐</div>
+              </div>
+              <div class="journal-actions">
+                <button id="saveEntry" class="primary">Save Entry</button>
+                <button id="newEntry" class="ghost">New Entry</button>
+              </div>
+              <ul id="entryList" class="entry-list" aria-label="Previous entries"></ul>
+            </div>
+          </div>
+
+          <div class="panel" id="tab-analytics" data-view="analytics" hidden>
+            <div class="panel-inner">
+              <h2>Analytics</h2>
+              <div class="card">
+                <h3 class="card-title">Mood Trend (Last 30 Days)</h3>
+                <canvas id="moodChart" height="220" aria-label="Mood trend chart" role="img"></canvas>
+              </div>
+              <div class="card">
+                <h3 class="card-title">Journaling Streak</h3>
+                <div id="streak" class="big-number">0 days</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel" id="tab-settings" data-view="settings" hidden>
+            <div class="panel-inner">
+              <h2>Settings & Privacy</h2>
+              <div class="card">
+                <h3 class="card-title">Privacy First</h3>
+                <p>All your data is stored locally on this device using your browser’s storage. No accounts. No trackers. No analytics. You can export or erase any time.</p>
+                <div class="settings-actions">
+                  <button id="exportData" class="ghost">Export Data</button>
+                  <label class="file-btn">
+                    <input id="importFile" type="file" accept="application/json" />
+                    <span>Import Data</span>
+                  </label>
+                  <button id="clearData" class="danger">Erase All Data</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <form id="chatForm" class="composer" autocomplete="off" aria-label="Send a message">
+            <div class="composer-inner">
+              <button id="micBtn" type="button" class="icon-btn" aria-label="Voice input" title="Voice input">
+                <span class="gemini-icon" aria-hidden="true">
+                  <span class="orb"></span>
+                  <span class="orb"></span>
+                  <span class="orb"></span>
+                </span>
+              </button>
+              <input id="chatInput" name="message" type="text" inputmode="text" placeholder="Message SoulSync..." aria-label="Message" />
+              <button id="sendBtn" type="submit" class="primary" aria-label="Send message" title="Send">
+                <svg viewBox="0 0 24 24" class="icon"><path d="M22 2L11 13" stroke="currentColor" stroke-width="2"/><path d="M22 2l-7 20-4-9-9-4 20-7z" fill="currentColor"/></svg>
+              </button>
+            </div>
+          </form>
+        </section>
+      </div>
+    </main>
+  </body>
+</html>
